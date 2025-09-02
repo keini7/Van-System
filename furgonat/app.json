@@ -1,0 +1,9 @@
+{
+  "expo": {
+    "name": "Furgonat",
+    "slug": "furgonat",
+    "version": "1.0.0",
+    "jsEngine": "jsc",
+    "assetBundlePatterns": ["**/*"]
+  }
+}
