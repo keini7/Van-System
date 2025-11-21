@@ -9,12 +9,15 @@ Backend API për sistemin e rezervimit të furgonave.
 npm install
 ```
 
-2. Nis serverin (`.env` krijohet automatikisht nga `env-template.txt`):
+2. Krijo `.env` file (kopjo nga `env-template.txt` ose krijo manualisht):
 ```bash
-npm run dev
+# Nëse ke env-template.txt lokal, kopjoje:
+cp env-template.txt .env
+
+# Ose krijo manualisht .env me këto variabla:
 ```
 
-3. Konfiguro `.env` nëse duhet (krijohet automatikisht, por mund ta ndryshosh):
+3. Konfiguro `.env`:
 ```env
 MONGODB_URI=mongodb://localhost:27017/furgonat
 PORT=5000
