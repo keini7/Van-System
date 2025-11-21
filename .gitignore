@@ -36,7 +36,10 @@ furgonat-backend/node_modules/
 furgonat-backend/dist/
 furgonat-backend/build/
 furgonat-backend/.env
+furgonat-backend/.env.*
+furgonat-backend/env-template.txt
 furgonat-backend/*.log
+furgonat-backend/*.env*
 
 # TypeScript
 *.tsbuildinfo
