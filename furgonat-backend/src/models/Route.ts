@@ -1,16 +1,15 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IRoute extends Document {
-  origin: string; // Nga ku (p.sh. "Tirana", "Durrës")
-  destination: string; // Ku (p.sh. "Shkodër", "Vlorë")
-  departureTime: string; // Ora e nisjes (p.sh. "08:00", "14:30")
-  arrivalTime: string; // Ora e mbërritjes
-  price: number; // Çmimi për person
-  van: mongoose.Types.ObjectId; // Referencë për Van
-  manager: mongoose.Types.ObjectId; // Referencë për User (manager)
-  availableSeats: number; // Vende të lira
-  totalSeats: number; // Total vende
-  date: Date; // Data e udhëtimit
+  origin: string;
+  destination: string;
+  departureTime: string;
+  arrivalTime: string;
+  van: mongoose.Types.ObjectId;
+  manager: mongoose.Types.ObjectId;
+  availableSeats: number;
+  totalSeats: number;
+  date: Date;
   status: "scheduled" | "completed" | "cancelled";
   created_at: Date;
 }
@@ -21,7 +20,6 @@ const RouteSchema = new Schema<IRoute>(
     destination: { type: String, required: true },
     departureTime: { type: String, required: true },
     arrivalTime: { type: String, required: true },
-    price: { type: Number, required: true },
     van: { type: Schema.Types.ObjectId, ref: "Van", required: true },
     manager: { type: Schema.Types.ObjectId, ref: "User", required: true },
     availableSeats: { type: Number, required: true, default: 0 },

@@ -24,7 +24,7 @@ export default function ClientDashboard({ navigation }) {
   const [dashboardData, setDashboardData] = useState(null);
   const [routes, setRoutes] = useState([]);
   const [bookings, setBookings] = useState([]);
-  const [activeTab, setActiveTab] = useState("home"); // 'home', 'routes', 'bookings'
+  const [activeTab, setActiveTab] = useState("home");
 
   useEffect(() => {
     loadDashboardData();
@@ -35,7 +35,6 @@ export default function ClientDashboard({ navigation }) {
       setLoading(true);
       const endpoints = await getApiEndpoints();
 
-      // Load dashboard
       const dashboardRes = await fetch(endpoints.USER.DASHBOARD, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
@@ -44,7 +43,6 @@ export default function ClientDashboard({ navigation }) {
       const dashboardJson = await dashboardRes.json();
       setDashboardData(dashboardJson);
 
-      // Load routes
       const routesRes = await fetch(endpoints.USER.ROUTES, {
         headers: {
           Authorization: `Bearer ${user?.token}`,
@@ -53,7 +51,6 @@ export default function ClientDashboard({ navigation }) {
       const routesJson = await routesRes.json();
       setRoutes(routesJson.routes || []);
 
-      // Load bookings
       const bookingsRes = await fetch(endpoints.USER.BOOKINGS, {
         headers: {
           Authorization: `Bearer ${user?.token}`,

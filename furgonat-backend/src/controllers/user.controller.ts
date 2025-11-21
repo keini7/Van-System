@@ -106,37 +106,33 @@ export const getAvailableRoutes = async (req: Request, res: Response) => {
       .sort({ date: 1, departureTime: 1 });
 
     // Filter out routes that have passed (date + time) or have no available seats
-    existingRoutes = existingRoutes.filter((route) => {
-      // Check if route has available seats
-      if (route.availableSeats <= 0) {
-        return false;
+    const filteredExistingRoutes: any[] = [];
+    for (const route of existingRoutes) {
+      // Exclude routes with no available seats
+      if (typeof route.availableSeats === "number" && route.availableSeats <= 0) {
+        continue;
       }
 
-      // Check if route date has passed
+      // Ensure route.date is a valid date
       const routeDate = new Date(route.date);
-      routeDate.setHours(0, 0, 0, 0);
-      const todayForFilter = new Date(now);
-      todayForFilter.setHours(0, 0, 0, 0);
-
-      // If route date is in the past, exclude it
-      if (routeDate < todayForFilter) {
-        return false;
+      // Ensure route.departureTime is a string like "HH:mm"
+      let departureTimeStr = "00:00";
+      if (typeof route.departureTime === "string") {
+        departureTimeStr = route.departureTime;
       }
 
-      // If route date is today, check if departure time has passed
-      if (routeDate.getTime() === todayForFilter.getTime()) {
-        const [hours, minutes] = route.departureTime.split(':').map(Number);
-        const departureDateTime = new Date(routeDate);
-        departureDateTime.setHours(hours, minutes, 0, 0);
-        
-        // If departure time has passed, exclude it
-        if (departureDateTime < now) {
-          return false;
-        }
-      }
+      const [depHour = 0, depMin = 0] = departureTimeStr.split(":").map(Number);
 
-      return true;
-    });
+      // Combine date + time for the route's scheduled departure
+      const routeDateTime = new Date(routeDate);
+      routeDateTime.setHours(depHour, depMin, 0, 0);
+
+      // If route datetime is before "now", exclude it
+      if (routeDateTime < now) continue;
+
+      filteredExistingRoutes.push(route);
+    }
+    existingRoutes = filteredExistingRoutes;
 
     // Get active schedules and create routes for upcoming dates
     const activeSchedules = await Schedule.find({ isActive: true })

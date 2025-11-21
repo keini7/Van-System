@@ -25,7 +25,6 @@ export default function ManagerDashboard({ navigation }) {
   const { colors } = useContext(ThemeContext);
   const { user, logout, isTokenValid } = useContext(AuthContext);
 
-  // Debug: log user state
   useEffect(() => {
     if (__DEV__) {
       console.log("👤 Manager Dashboard - User state:", {
@@ -43,7 +42,7 @@ export default function ManagerDashboard({ navigation }) {
   const [routes, setRoutes] = useState([]);
   const [bookings, setBookings] = useState([]);
   const [schedules, setSchedules] = useState([]);
-  const [activeTab, setActiveTab] = useState("home"); // 'home', 'vans', 'routes', 'bookings', 'schedules'
+  const [activeTab, setActiveTab] = useState("home");
   
   // Form states
   const [showVanForm, setShowVanForm] = useState(false);
@@ -253,7 +252,6 @@ export default function ManagerDashboard({ navigation }) {
       return;
     }
 
-    // Verifiko nëse token-i është i vlefshëm
     if (!isTokenValid()) {
       Alert.alert(
         "Token i skaduar",

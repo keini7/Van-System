@@ -1,11 +1,9 @@
-// API Configuration
 import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const STORAGE_KEY = "@api_base_url";
 const PORT = 5000;
 
-// Funksion për të testuar nëse një URL funksionon
 const testUrl = async (url, timeout = 2000) => {
   try {
     const controller = new AbortController();
@@ -26,9 +24,7 @@ const testUrl = async (url, timeout = 2000) => {
   }
 };
 
-// Funksion për të detektuar automatikisht IP-në e kompjuterit
 export const detectServerIP = async () => {
-  // Nëse ka environment variable, përdor atë
   if (process.env.EXPO_PUBLIC_API_URL) {
     if (__DEV__) {
       console.log("🔗 Using EXPO_PUBLIC_API_URL:", process.env.EXPO_PUBLIC_API_URL);
@@ -36,7 +32,6 @@ export const detectServerIP = async () => {
     return process.env.EXPO_PUBLIC_API_URL;
   }
 
-  // Kontrollo nëse kemi ruajtur IP-në më parë
   try {
     const storedUrl = await AsyncStorage.getItem(STORAGE_KEY);
     if (storedUrl) {
@@ -54,13 +49,11 @@ export const detectServerIP = async () => {
       }
     }
   } catch (e) {
-    // Ignore storage errors
     if (__DEV__) {
       console.warn("⚠️ Error reading stored URL:", e.message);
     }
   }
 
-  // Për Android emulator, përdor 10.0.2.2 (alias për localhost)
   if (Platform.OS === "android") {
     try {
       const controller = new AbortController();
@@ -77,14 +70,11 @@ export const detectServerIP = async () => {
         return url;
       }
     } catch (e) {
-      // Nëse nuk funksionon, përdor 10.0.2.2 për emulator
       return `http://10.0.2.2:${PORT}`;
     }
   }
 
-  // Për iOS simulator, provo localhost dhe IP të detektuar
   if (Platform.OS === "ios") {
-    // Provo localhost së pari (funksionon në iOS simulator)
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 2000);
@@ -100,7 +90,6 @@ export const detectServerIP = async () => {
           console.log("📱 iOS: Detected server config:", data);
         }
         
-        // Nëse backend kthen IP, përdor atë (për device fizik)
         if (data.ip && data.ip !== "localhost" && data.ip !== "127.0.0.1") {
           const url = `http://${data.ip}:${data.port || PORT}`;
           await AsyncStorage.setItem(STORAGE_KEY, url);
@@ -109,7 +98,6 @@ export const detectServerIP = async () => {
           }
           return url;
         } else {
-          // Për simulator, përdor localhost
           const url = `http://localhost:${PORT}`;
           await AsyncStorage.setItem(STORAGE_KEY, url);
           if (__DEV__) {
@@ -123,7 +111,6 @@ export const detectServerIP = async () => {
         console.warn("📱 iOS: localhost failed, trying network IP:", e.message);
       }
       
-      // Nëse localhost nuk funksionon, provo IP të detektuar
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2000);
@@ -148,7 +135,6 @@ export const detectServerIP = async () => {
         }
       }
       
-      // Fallback në localhost
       if (__DEV__) {
         console.log("📱 iOS: Using localhost as fallback");
       }
@@ -156,20 +142,16 @@ export const detectServerIP = async () => {
     }
   }
 
-  // Për web, përdor localhost
   if (Platform.OS === "web") {
     return `http://localhost:${PORT}`;
   }
 
-  // Për device fizik ose kur platform nuk është e detektuar, provo të detektojmë IP-në
-  // Së pari, provo të marrim IP nga backend përmes localhost
   try {
     const localhostTest = await testUrl(`http://localhost:${PORT}`);
     if (localhostTest.success && localhostTest.data) {
       const serverIP = localhostTest.data.ip;
       const serverPort = localhostTest.data.port || PORT;
       
-      // Nëse backend kthen IP tjetër (jo localhost), përdor atë
       if (serverIP && serverIP !== "localhost" && serverIP !== "127.0.0.1") {
         const networkUrl = `http://${serverIP}:${serverPort}`;
         await AsyncStorage.setItem(STORAGE_KEY, networkUrl);
@@ -185,7 +167,6 @@ export const detectServerIP = async () => {
     }
   }
   
-  // Nëse localhost funksionon, përdor atë
   const localhostUrl = `http://localhost:${PORT}`;
   if (__DEV__) {
     console.log("📱 Using localhost:", localhostUrl);
@@ -193,10 +174,8 @@ export const detectServerIP = async () => {
   return localhostUrl;
 };
 
-// Cache për API base URL
 let cachedApiBaseUrl = null;
 
-// Funksion për të marrë API base URL (me cache)
 export const getApiBaseUrl = async () => {
   if (cachedApiBaseUrl) {
     return cachedApiBaseUrl;
@@ -206,7 +185,6 @@ export const getApiBaseUrl = async () => {
   return cachedApiBaseUrl;
 };
 
-// Funksion për të marrë API endpoints (async)
 export const getApiEndpoints = async () => {
   const baseUrl = await getApiBaseUrl();
   const endpoints = {
@@ -243,10 +221,8 @@ export const getApiEndpoints = async () => {
   return endpoints;
 };
 
-// Default API base URL (për backward compatibility)
 const defaultApiBaseUrl = `http://localhost:${PORT}`;
 
-// Detekto IP-në automatikisht në startup
 detectServerIP().then((url) => {
   cachedApiBaseUrl = url;
   if (__DEV__) {
@@ -259,6 +235,5 @@ detectServerIP().then((url) => {
   cachedApiBaseUrl = defaultApiBaseUrl;
 });
 
-// Export default (përdor default nëse nuk është detektuar akoma)
 export default defaultApiBaseUrl;
 

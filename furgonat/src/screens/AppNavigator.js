@@ -16,7 +16,6 @@ export default function AppNavigator() {
   const { user, loading } = useContext(AuthContext);
   const { colors } = useContext(ThemeContext);
 
-  // Show loading screen while checking auth state
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background }}>

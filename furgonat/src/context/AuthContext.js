@@ -11,7 +11,6 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Load user from storage on mount
   useEffect(() => {
     loadStoredAuth();
   }, []);
@@ -23,7 +22,6 @@ export function AuthProvider({ children }) {
       
       if (token && userData) {
         const parsedUserData = JSON.parse(userData);
-        // Siguro që token-i është në userData dhe është i pastër (pa whitespace)
         const cleanToken = token.trim();
         parsedUserData.token = cleanToken;
         
@@ -86,7 +84,6 @@ export function AuthProvider({ children }) {
           return { success: false, error: "No token received from server" };
         }
 
-        // Pastro token-in (hiq whitespace)
         const cleanToken = data.token.trim();
         
         const userData = {
@@ -96,10 +93,8 @@ export function AuthProvider({ children }) {
           token: cleanToken,
         };
         
-        // Save to state
         setUser(userData);
         
-        // Save to storage - siguro që token-i është i pastër
         await AsyncStorage.setItem(TOKEN_KEY, cleanToken);
         await AsyncStorage.setItem(USER_KEY, JSON.stringify(userData));
         
@@ -153,7 +148,6 @@ export function AuthProvider({ children }) {
       console.log("📥 Response status:", res.status);
       console.log("📥 Response headers:", Object.fromEntries(res.headers.entries()));
 
-      // Check if response is JSON
       let data;
       const contentType = res.headers.get("content-type");
       
@@ -189,7 +183,6 @@ export function AuthProvider({ children }) {
       console.error("Error details:", err.message);
       console.error("Error stack:", err.stack);
       
-      // More specific error messages
       if (err.message === "Network request failed" || err.message.includes("Failed to fetch")) {
         const endpoints = await getApiEndpoints();
         return { 
@@ -218,7 +211,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Funksion për të verifikuar nëse token-i është i vlefshëm
   const isTokenValid = () => {
     if (!user?.token) return false;
     

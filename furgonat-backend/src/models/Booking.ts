@@ -1,16 +1,16 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export interface IBooking extends Document {
-  user: mongoose.Types.ObjectId; // Referencë për User (client)
-  route: mongoose.Types.ObjectId; // Referencë për Route
-  van: mongoose.Types.ObjectId; // Referencë për Van
-  manager: mongoose.Types.ObjectId; // Referencë për User (manager)
-  numberOfSeats: number; // Numri i vendeve të rezervuara
-  totalPrice: number; // Çmimi total
+  user: mongoose.Types.ObjectId;
+  route: mongoose.Types.ObjectId;
+  van: mongoose.Types.ObjectId;
+  manager: mongoose.Types.ObjectId;
+  numberOfSeats: number;
+  totalPrice: number;
   status: "pending" | "confirmed" | "cancelled" | "completed";
-  passengerName?: string; // Emri i pasagjerit (opsional, mund të jetë i ndryshëm nga user)
-  passengerPhone?: string; // Telefoni i pasagjerit
-  notes?: string; // Shënime shtesë
+  passengerName?: string;
+  passengerPhone?: string;
+  notes?: string;
   created_at: Date;
 }
 
@@ -37,7 +37,6 @@ const BookingSchema = new Schema<IBooking>(
   }
 );
 
-// Indekse
 BookingSchema.index({ user: 1 });
 BookingSchema.index({ route: 1 });
 BookingSchema.index({ van: 1 });

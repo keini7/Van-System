@@ -8,9 +8,7 @@ export async function setupDatabase(): Promise<void> {
   try {
     console.log("🔧 Verifying database setup...");
 
-    // MongoDB krijo collections automatikisht kur përdor models
-    // Thjesht verifikojmë që modeli është i definuar
-    // Indekset janë të definuara në User schema
+   
     
     // Test query për të siguruar që collection ekziston
     await User.findOne().limit(1);

@@ -14,11 +14,9 @@ Sistem për rezervimin e furgonave. Ka dy lloje përdoruesish: user i thjeshtë 
 ```bash
 cd furgonat-backend
 npm install
-cp env-template.txt .env
 npm run dev
 ```
 
-Serveri niset në `http://localhost:5000`
 
 ### Frontend
 
@@ -63,49 +61,7 @@ Pastaj hap me Expo Go në telefon ose simulator.
 - MongoDB me Mongoose
 - JWT për authentication
 
-## Struktura
 
-```
-Van-System/
-├── furgonat/              # Frontend
-│   └── src/
-│       ├── screens/       # Ekrane (auth, dashboard)
-│       ├── context/       # Auth, Theme, Settings
-│       └── components/    # Komponente
-│
-└── furgonat-backend/      # Backend
-    └── src/
-        ├── controllers/   # Business logic
-        ├── models/        # MongoDB models
-        ├── routes/        # API routes
-        └── middleware/    # Auth, error handling
-```
 
-## API
-
-Backend ka dokumentacion Swagger në `http://localhost:5000/docs` pasi të niset serveri.
-
-Endpoints kryesore:
-- `/api/auth/register` - Regjistrim
-- `/api/auth/login` - Login
-- `/api/user/routes` - Destinacione për user
-- `/api/manager/vans` - Menaxhim furgonash
-- `/api/manager/schedules` - Menaxhim orarësh
-
-## Database
-
-Përdor MongoDB. Baza e të dhënave krijohet automatikisht kur lidhja me MongoDB është e suksesshme.
-
-Collections:
-- `users` - Përdoruesit
-- `vans` - Furgonat
-- `schedules` - Orarët fikse
-- `routes` - Routes për ditë specifike
-- `bookings` - Rezervimet
-
-## Shënime
-
-- Origin është fiksuar në "Pogradec"
-- Ora e nisjes duhet të jetë ndërmjet 05:00 dhe 18:00
-- Routes krijohen automatikisht nga schedules aktive
-- Routes që kanë kaluar ose janë plot fshihen nga lista
+##
+Projekt i krijuar per te treguar dhe testuar aftesite e mia ne programim.

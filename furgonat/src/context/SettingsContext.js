@@ -7,21 +7,20 @@ export const SettingsContext = createContext();
 const SETTINGS_STORAGE_KEY = "@furgonat_settings";
 
 const defaultSettings = {
-  fontSize: "medium", // "small", "medium", "large", "xlarge"
-  fontType: "system", // "system", "sans-serif", "serif", "monospace"
-  theme: "light", // "light", "dark", "auto"
+  fontSize: "medium",
+  fontType: "system",
+  theme: "light",
   notifications: true,
-  language: "sq", // "sq", "en"
+  language: "sq",
   showPhotos: true,
   autoRefresh: true,
-  refreshInterval: 30, // seconds
+  refreshInterval: 30,
 };
 
 export function SettingsProvider({ children }) {
   const [settings, setSettings] = useState(defaultSettings);
   const [loading, setLoading] = useState(true);
 
-  // Load settings from storage
   useEffect(() => {
     loadSettings();
   }, []);
@@ -63,7 +62,6 @@ export function SettingsProvider({ children }) {
     }
   };
 
-  // Get font size multiplier
   const getFontSizeMultiplier = () => {
     switch (settings.fontSize) {
       case "small":
@@ -79,7 +77,6 @@ export function SettingsProvider({ children }) {
     }
   };
 
-  // Get font family
   const getFontFamily = () => {
     switch (settings.fontType) {
       case "system":
