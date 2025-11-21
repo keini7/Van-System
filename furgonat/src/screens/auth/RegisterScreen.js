@@ -17,7 +17,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { Picker } from "@react-native-picker/picker";
 
 export default function RegisterScreen({ navigation }) {
-  const { colors } = useContext(ThemeContext);
+  const { colors, getFontFamily } = useContext(ThemeContext);
   const { register } = useContext(AuthContext);
 
   const [step, setStep] = useState(0);
@@ -93,7 +93,7 @@ export default function RegisterScreen({ navigation }) {
       >
         {step === 0 ? (
           <View style={styles.container}>
-          <Text style={[styles.title, { color: colors.text }]}>
+          <Text style={[styles.title, { color: colors.text, fontFamily: getFontFamily() }]}>
             Register as:
           </Text>
           <TouchableOpacity
@@ -103,7 +103,7 @@ export default function RegisterScreen({ navigation }) {
               setStep(1);
             }}
           >
-            <Text style={{ color: colors.background, fontWeight: "bold" }}>
+            <Text style={{ color: colors.background, fontWeight: "bold", fontFamily: getFontFamily() }}>
               User
             </Text>
           </TouchableOpacity>
@@ -118,13 +118,13 @@ export default function RegisterScreen({ navigation }) {
               setStep(1);
             }}
           >
-            <Text style={{ color: colors.background, fontWeight: "bold" }}>
+            <Text style={{ color: colors.background, fontWeight: "bold", fontFamily: getFontFamily() }}>
               Van Manager
             </Text>
           </TouchableOpacity>
 
           <View style={styles.loginContainer}>
-            <Text style={[styles.loginText, { color: colors.text, opacity: 0.7 }]}>
+            <Text style={[styles.loginText, { color: colors.text, opacity: 0.7, fontFamily: getFontFamily() }]}>
               Ke tashmë llogari?
             </Text>
             <TouchableOpacity
@@ -132,7 +132,7 @@ export default function RegisterScreen({ navigation }) {
               style={[styles.loginButton, { borderColor: colors.border }]}
               activeOpacity={0.7}
             >
-              <Text style={[styles.loginButtonText, { color: colors.text }]}>
+              <Text style={[styles.loginButtonText, { color: colors.text, fontFamily: getFontFamily() }]}>
                 Hyr në llogari
               </Text>
             </TouchableOpacity>
@@ -144,7 +144,7 @@ export default function RegisterScreen({ navigation }) {
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          <Text style={[styles.title, { color: colors.text }]}>
+          <Text style={[styles.title, { color: colors.text, fontFamily: getFontFamily() }]}>
             Register {role === "manager" ? "Van Manager" : "User"}
           </Text>
 
@@ -197,7 +197,7 @@ export default function RegisterScreen({ navigation }) {
 
           {/* Gender */}
           <View style={styles.genderContainer}>
-            <Text style={[styles.genderLabel, { color: colors.text }]}>Gjinia</Text>
+            <Text style={[styles.genderLabel, { color: colors.text, fontFamily: getFontFamily() }]}>Gjinia</Text>
             <View style={styles.genderButtons}>
               <TouchableOpacity
                 style={[
@@ -215,6 +215,7 @@ export default function RegisterScreen({ navigation }) {
                     styles.genderButtonText,
                     {
                       color: gender === "male" ? "#FFFFFF" : colors.text,
+                      fontFamily: getFontFamily(),
                     },
                   ]}
                 >
@@ -237,6 +238,7 @@ export default function RegisterScreen({ navigation }) {
                     styles.genderButtonText,
                     {
                       color: gender === "female" ? "#FFFFFF" : colors.text,
+                      fontFamily: getFontFamily(),
                     },
                   ]}
                 >
@@ -259,6 +261,7 @@ export default function RegisterScreen({ navigation }) {
                     styles.genderButtonText,
                     {
                       color: gender === "prefer_not" ? "#FFFFFF" : colors.text,
+                      fontFamily: getFontFamily(),
                     },
                   ]}
                 >
@@ -273,7 +276,7 @@ export default function RegisterScreen({ navigation }) {
             onPress={() => setShowDatePicker(true)}
             style={[styles.input, { justifyContent: "center" }]}
           >
-            <Text style={{ color: birthdate ? colors.text : "gray" }}>
+            <Text style={{ color: birthdate ? colors.text : "gray", fontFamily: getFontFamily() }}>
               {birthdate || "Select Birthdate"}
             </Text>
           </TouchableOpacity>
@@ -338,7 +341,7 @@ export default function RegisterScreen({ navigation }) {
             onPress={handleRegister}
             disabled={loading}
           >
-            <Text style={{ color: colors.background, fontWeight: "bold" }}>
+            <Text style={{ color: colors.background, fontWeight: "bold", fontFamily: getFontFamily() }}>
               {loading ? "Registering..." : "Register"}
             </Text>
           </TouchableOpacity>
@@ -348,8 +351,8 @@ export default function RegisterScreen({ navigation }) {
             style={[styles.backButton, { borderColor: colors.border }]}
             activeOpacity={0.7}
           >
-            <Text style={[styles.backButtonIcon, { color: colors.text }]}>←</Text>
-            <Text style={[styles.backButtonText, { color: colors.text }]}>Kthehu</Text>
+            <Text style={[styles.backButtonIcon, { color: colors.text, fontFamily: getFontFamily() }]}>←</Text>
+            <Text style={[styles.backButtonText, { color: colors.text, fontFamily: getFontFamily() }]}>Kthehu</Text>
           </TouchableOpacity>
         </ScrollView>
         )}

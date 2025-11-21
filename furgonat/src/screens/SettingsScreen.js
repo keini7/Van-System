@@ -15,7 +15,7 @@ import { SettingsContext } from "../context/SettingsContext";
 import { AuthContext } from "../context/AuthContext";
 
 export default function SettingsScreen({ navigation }) {
-  const { colors, theme, toggleTheme } = useContext(ThemeContext);
+  const { colors, theme, toggleTheme, getFontFamily } = useContext(ThemeContext);
   const { settings, updateSetting, resetSettings, getFontSizeMultiplier } = useContext(SettingsContext);
   const { user, logout } = useContext(AuthContext);
 
@@ -28,9 +28,9 @@ export default function SettingsScreen({ navigation }) {
 
   const fontTypeOptions = [
     { label: "Sistemi", value: "system" },
-    { label: "Sans-serif", value: "sans-serif" },
-    { label: "Serif", value: "serif" },
-    { label: "Monospace", value: "monospace" },
+    { label: "Roboto", value: "roboto" },
+    { label: "Arial", value: "arial" },
+    { label: "Times New Roman", value: "times" },
   ];
 
   const handleResetSettings = () => {
@@ -67,30 +67,36 @@ export default function SettingsScreen({ navigation }) {
   };
 
   const baseFontSize = 14 * getFontSizeMultiplier();
+  
+  // Helper to get font style with both size and family
+  const getFontStyle = (size) => ({
+    fontSize: size,
+    fontFamily: getFontFamily(),
+  });
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Text style={[styles.backButtonText, { color: colors.text }]}>← Kthehu</Text>
+          <Text style={[styles.backButtonText, { color: colors.text }, getFontStyle(16)]}>← Kthehu</Text>
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>Cilësimet</Text>
+        <Text style={[styles.headerTitle, { color: colors.text }, getFontStyle(20)]}>Cilësimet</Text>
         <View style={{ width: 80 }} />
       </View>
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Theme Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text, fontSize: baseFontSize + 2 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }, getFontStyle(baseFontSize + 2)]}>
             🎨 Temë
           </Text>
           <View style={[styles.settingItem, { borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Text style={[styles.settingLabel, { color: colors.text, fontSize: baseFontSize }]}>
+              <Text style={[styles.settingLabel, { color: colors.text }, getFontStyle(baseFontSize)]}>
                 Mënyra e errët/dritë
               </Text>
-              <Text style={[styles.settingDescription, { color: colors.text, opacity: 0.6, fontSize: baseFontSize - 2 }]}>
+              <Text style={[styles.settingDescription, { color: colors.text, opacity: 0.6 }, getFontStyle(baseFontSize - 2)]}>
                 {theme === "light" ? "Mënyra e dritës aktive" : "Mënyra e errët aktive"}
               </Text>
             </View>
@@ -110,7 +116,7 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Font Size Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text, fontSize: baseFontSize + 2 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }, getFontStyle(baseFontSize + 2)]}>
             📝 Madhësia e shkronjave
           </Text>
           <View style={styles.optionsContainer}>
@@ -131,8 +137,8 @@ export default function SettingsScreen({ navigation }) {
                     styles.optionText,
                     {
                       color: settings.fontSize === option.value ? "#FFFFFF" : colors.text,
-                      fontSize: baseFontSize,
                     },
+                    getFontStyle(baseFontSize),
                   ]}
                 >
                   {option.label}
@@ -144,7 +150,7 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Font Type Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text, fontSize: baseFontSize + 2 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }, getFontStyle(baseFontSize + 2)]}>
             🔤 Lloji i shkronjave
           </Text>
           <View style={styles.optionsContainer}>
@@ -165,8 +171,8 @@ export default function SettingsScreen({ navigation }) {
                     styles.optionText,
                     {
                       color: settings.fontType === option.value ? "#FFFFFF" : colors.text,
-                      fontSize: baseFontSize,
                     },
+                    getFontStyle(baseFontSize),
                   ]}
                 >
                   {option.label}
@@ -178,15 +184,15 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Notifications Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text, fontSize: baseFontSize + 2 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }, getFontStyle(baseFontSize + 2)]}>
             🔔 Njoftimet
           </Text>
           <View style={[styles.settingItem, { borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Text style={[styles.settingLabel, { color: colors.text, fontSize: baseFontSize }]}>
+              <Text style={[styles.settingLabel, { color: colors.text }, getFontStyle(baseFontSize)]}>
                 Aktivizo njoftimet
               </Text>
-              <Text style={[styles.settingDescription, { color: colors.text, opacity: 0.6, fontSize: baseFontSize - 2 }]}>
+              <Text style={[styles.settingDescription, { color: colors.text, opacity: 0.6 }, getFontStyle(baseFontSize - 2)]}>
                 Merr njoftime për rezervime dhe përditësime
               </Text>
             </View>
@@ -201,15 +207,15 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Display Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text, fontSize: baseFontSize + 2 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }, getFontStyle(baseFontSize + 2)]}>
             🖼️ Shfaqja
           </Text>
           <View style={[styles.settingItem, { borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Text style={[styles.settingLabel, { color: colors.text, fontSize: baseFontSize }]}>
+              <Text style={[styles.settingLabel, { color: colors.text }, getFontStyle(baseFontSize)]}>
                 Shfaq foto të furgonave
               </Text>
-              <Text style={[styles.settingDescription, { color: colors.text, opacity: 0.6, fontSize: baseFontSize - 2 }]}>
+              <Text style={[styles.settingDescription, { color: colors.text, opacity: 0.6 }, getFontStyle(baseFontSize - 2)]}>
                 Shfaq ose fshih fotot në listat e furgonave
               </Text>
             </View>
@@ -224,15 +230,15 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Data Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text, fontSize: baseFontSize + 2 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }, getFontStyle(baseFontSize + 2)]}>
             📊 Të dhënat
           </Text>
           <View style={[styles.settingItem, { borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Text style={[styles.settingLabel, { color: colors.text, fontSize: baseFontSize }]}>
+              <Text style={[styles.settingLabel, { color: colors.text }, getFontStyle(baseFontSize)]}>
                 Përditësim automatik
               </Text>
-              <Text style={[styles.settingDescription, { color: colors.text, opacity: 0.6, fontSize: baseFontSize - 2 }]}>
+              <Text style={[styles.settingDescription, { color: colors.text, opacity: 0.6 }, getFontStyle(baseFontSize - 2)]}>
                 Përditëso automatikisht të dhënat çdo {settings.refreshInterval} sekonda
               </Text>
             </View>
@@ -247,15 +253,15 @@ export default function SettingsScreen({ navigation }) {
 
         {/* Account Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text, fontSize: baseFontSize + 2 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }, getFontStyle(baseFontSize + 2)]}>
             👤 Llogaria
           </Text>
           <View style={[styles.settingItem, { borderColor: colors.border }]}>
             <View style={styles.settingLeft}>
-              <Text style={[styles.settingLabel, { color: colors.text, fontSize: baseFontSize }]}>
+              <Text style={[styles.settingLabel, { color: colors.text }, getFontStyle(baseFontSize)]}>
                 {user?.firstName} {user?.lastName}
               </Text>
-              <Text style={[styles.settingDescription, { color: colors.text, opacity: 0.6, fontSize: baseFontSize - 2 }]}>
+              <Text style={[styles.settingDescription, { color: colors.text, opacity: 0.6 }, getFontStyle(baseFontSize - 2)]}>
                 {user?.email}
               </Text>
             </View>
@@ -264,7 +270,7 @@ export default function SettingsScreen({ navigation }) {
             style={[styles.actionButton, { borderColor: colors.border }]}
             onPress={handleLogout}
           >
-            <Text style={[styles.actionButtonText, { color: "#FF3B30", fontSize: baseFontSize }]}>
+            <Text style={[styles.actionButtonText, { color: "#FF3B30" }, getFontStyle(baseFontSize)]}>
               Dil nga llogaria
             </Text>
           </TouchableOpacity>
@@ -272,14 +278,14 @@ export default function SettingsScreen({ navigation }) {
 
         {/* About Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: colors.text, fontSize: baseFontSize + 2 }]}>
+          <Text style={[styles.sectionTitle, { color: colors.text }, getFontStyle(baseFontSize + 2)]}>
             ℹ️ Rreth aplikacionit
           </Text>
           <View style={[styles.infoCard, { backgroundColor: colors.border, opacity: 0.3 }]}>
-            <Text style={[styles.infoText, { color: colors.text, fontSize: baseFontSize }]}>
+            <Text style={[styles.infoText, { color: colors.text }, getFontStyle(baseFontSize)]}>
               Furgonat v1.0.0
             </Text>
-            <Text style={[styles.infoText, { color: colors.text, opacity: 0.7, fontSize: baseFontSize - 2 }]}>
+            <Text style={[styles.infoText, { color: colors.text, opacity: 0.7 }, getFontStyle(baseFontSize - 2)]}>
               Aplikacion për rezervimin e furgonave
             </Text>
           </View>
@@ -291,7 +297,7 @@ export default function SettingsScreen({ navigation }) {
             style={[styles.resetButton, { borderColor: colors.border }]}
             onPress={handleResetSettings}
           >
-            <Text style={[styles.resetButtonText, { color: colors.text, fontSize: baseFontSize }]}>
+            <Text style={[styles.resetButtonText, { color: colors.text }, getFontStyle(baseFontSize)]}>
               Rivendos të gjitha cilësimet
             </Text>
           </TouchableOpacity>

@@ -226,7 +226,7 @@ export const createRoute = async (req: Request, res: Response) => {
     });
 
     await route.save();
-    await route.populate("van", "plateNumber vanModel capacity");
+    await route.populate("van", "plateNumber vanModel capacity photo");
 
     res.status(201).json({
       message: "Route created successfully",
@@ -520,7 +520,7 @@ export const createRouteFromSchedule = async (req: Request, res: Response) => {
     });
 
     await route.save();
-    await route.populate("van", "plateNumber vanModel capacity");
+    await route.populate("van", "plateNumber vanModel capacity photo");
 
     res.status(201).json({
       message: "Route created from schedule successfully",

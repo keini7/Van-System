@@ -1,6 +1,11 @@
 import swaggerJsdoc from "swagger-jsdoc";
 import swaggerUi from "swagger-ui-express";
 import { Express } from "express";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const PORT = Number(process.env.PORT) || 5001;
 
 const options: swaggerJsdoc.Options = {
   definition: {
@@ -12,7 +17,7 @@ const options: swaggerJsdoc.Options = {
     },
     servers: [
       {
-        url: "http://localhost:5000/api",
+        url: `http://localhost:${PORT}/api`,
       },
     ],
   },

@@ -15,7 +15,7 @@ import { ThemeContext } from "../../context/ThemeContext";
 import { AuthContext } from "../../context/AuthContext";
 
 export default function LoginScreen({ navigation }) {
-  const { colors } = useContext(ThemeContext);
+  const { colors, getFontFamily } = useContext(ThemeContext);
   const { login } = useContext(AuthContext);
 
   const [email, setEmail] = useState("");
@@ -65,7 +65,7 @@ export default function LoginScreen({ navigation }) {
         keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
       >
         <View style={[styles.container, { backgroundColor: colors.background }]}>
-          <Text style={[styles.title, { color: colors.text }]}>Login</Text>
+          <Text style={[styles.title, { color: colors.text, fontFamily: getFontFamily() }]}>Login</Text>
 
       <TextInput
         placeholder="Email"
@@ -126,14 +126,14 @@ export default function LoginScreen({ navigation }) {
         {loading ? (
           <ActivityIndicator color={colors.background} />
         ) : (
-          <Text style={{ color: colors.background, fontWeight: "bold" }}>
+          <Text style={{ color: colors.background, fontWeight: "bold", fontFamily: getFontFamily() }}>
             Login
           </Text>
         )}
       </TouchableOpacity>
 
       <View style={styles.registerContainer}>
-        <Text style={[styles.registerText, { color: colors.text, opacity: 0.7 }]}>
+        <Text style={[styles.registerText, { color: colors.text, opacity: 0.7, fontFamily: getFontFamily() }]}>
           Nuk ke llogari?
         </Text>
         <TouchableOpacity 
@@ -142,7 +142,7 @@ export default function LoginScreen({ navigation }) {
           style={[styles.registerButton, { borderColor: colors.border }]}
           activeOpacity={0.7}
         >
-          <Text style={[styles.registerButtonText, { color: colors.text }]}>
+          <Text style={[styles.registerButtonText, { color: colors.text, fontFamily: getFontFamily() }]}>
             Krijoni një llogari
           </Text>
           </TouchableOpacity>

@@ -10,6 +10,7 @@ import {
   Alert,
   Platform,
   Image,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemeContext } from "../../context/ThemeContext";
@@ -17,7 +18,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { getApiEndpoints } from "../../config/api";
 
 export default function ClientDashboard({ navigation }) {
-  const { colors } = useContext(ThemeContext);
+  const { colors, getScaledFontSize, getFontFamily } = useContext(ThemeContext);
   const { user, logout } = useContext(AuthContext);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -88,7 +89,27 @@ export default function ClientDashboard({ navigation }) {
 
   const createBooking = async (routeId, numberOfSeats = 1) => {
     try {
+      if (!routeId) {
+        Alert.alert("Gabim", "Route ID nuk është i vlefshëm");
+        return;
+      }
+
+      if (!user?.token) {
+        Alert.alert("Gabim", "Ju nuk jeni të autentifikuar");
+        return;
+      }
+
       const endpoints = await getApiEndpoints();
+      
+      if (__DEV__) {
+        console.log("📤 Creating booking:", {
+          routeId,
+          numberOfSeats,
+          endpoint: endpoints.USER.CREATE_BOOKING,
+          hasToken: !!user?.token,
+        });
+      }
+
       const res = await fetch(endpoints.USER.CREATE_BOOKING, {
         method: "POST",
         headers: {
@@ -101,17 +122,38 @@ export default function ClientDashboard({ navigation }) {
         }),
       });
 
-      const data = await res.json();
+      let data;
+      try {
+        const text = await res.text();
+        data = text ? JSON.parse(text) : {};
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError);
+        Alert.alert("Gabim", "Përgjigja e serverit nuk është e vlefshme");
+        return;
+      }
+
+      if (__DEV__) {
+        console.log("📥 Booking response:", {
+          status: res.status,
+          ok: res.ok,
+          data,
+        });
+      }
 
       if (res.ok) {
         Alert.alert("Sukses", "Rezervimi u krijua me sukses!");
         loadDashboardData(); // Reload data
       } else {
-        Alert.alert("Gabim", data.error || "Dështoi rezervimi");
+        const errorMessage = data.error || data.message || "Dështoi rezervimi";
+        if (__DEV__) {
+          console.error("Booking error:", errorMessage);
+        }
+        Alert.alert("Gabim", errorMessage);
       }
     } catch (err) {
       console.error("Error creating booking:", err);
-      Alert.alert("Gabim", "Dështoi rezervimi");
+      const errorMessage = err.message || "Dështoi rezervimi për shkak të një gabimi në rrjet";
+      Alert.alert("Gabim", errorMessage);
     }
   };
 
@@ -161,6 +203,67 @@ export default function ClientDashboard({ navigation }) {
     });
   };
 
+  // Helper to get font style with both size and family
+  const getFontStyle = (baseSize) => ({ 
+    fontSize: getScaledFontSize(baseSize),
+    fontFamily: getFontFamily(),
+  });
+  
+  // Keep getFontSize for backward compatibility, but include font family
+  const getFontSize = (baseSize) => getFontStyle(baseSize);
+
+  // Handle phone call
+  const handlePhoneCall = (phoneNumber) => {
+    if (!phoneNumber || phoneNumber === "N/A") {
+      Alert.alert("Gabim", "Numri i telefonit nuk është i disponueshëm");
+      return;
+    }
+
+    // Clean phone number (remove spaces, dashes, etc.)
+    const cleanPhone = phoneNumber.replace(/[\s\-\(\)]/g, "");
+    
+    // Check if phone number is valid
+    if (cleanPhone.length < 3) {
+      Alert.alert("Gabim", "Numri i telefonit nuk është i vlefshëm");
+      return;
+    }
+
+    const phoneUrl = `tel:${cleanPhone}`;
+    
+    Linking.canOpenURL(phoneUrl)
+      .then((supported) => {
+        if (supported) {
+          return Linking.openURL(phoneUrl);
+        } else {
+          Alert.alert("Gabim", "Aplikacioni i telefonit nuk është i disponueshëm");
+        }
+      })
+      .catch((err) => {
+        console.error("Error opening phone dialer:", err);
+        Alert.alert("Gabim", "Dështoi hapja e aplikacionit të telefonit");
+      });
+  };
+
+  // Helper function to format photo URI (handle base64 images)
+  const getPhotoUri = (photo) => {
+    if (!photo) return null;
+    // If it's already a data URI, return as is
+    if (photo.startsWith("data:image")) {
+      return photo;
+    }
+    // If it's a URL (starts with http:// or https://), return as is
+    if (photo.startsWith("http://") || photo.startsWith("https://")) {
+      return photo;
+    }
+    // If it's base64 without prefix, add the data URI prefix
+    // Base64 strings are typically long and don't contain spaces
+    if (photo.length > 100 && !photo.includes(" ")) {
+      return `data:image/png;base64,${photo}`;
+    }
+    // Otherwise, assume it's a URL and try to use it
+    return photo;
+  };
+
   const activeBookings = bookings.filter(
     (b) => b.status === "pending" || b.status === "confirmed"
   );
@@ -180,7 +283,7 @@ export default function ClientDashboard({ navigation }) {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
+        <Text style={[styles.headerTitle, { color: colors.text }, getFontSize(20)]}>
           Mirë se erdhe, {dashboardData?.user?.firstName || user?.email}!
         </Text>
         <View style={styles.headerButtons}>
@@ -223,7 +326,7 @@ export default function ClientDashboard({ navigation }) {
           ]}
           onPress={() => setActiveTab("home")}
         >
-          <Text style={[styles.tabText, { color: colors.text }]}>Kryefaqja</Text>
+          <Text style={[styles.tabText, { color: colors.text }, getFontSize(14)]}>Kryefaqja</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -232,7 +335,7 @@ export default function ClientDashboard({ navigation }) {
           ]}
           onPress={() => setActiveTab("routes")}
         >
-          <Text style={[styles.tabText, { color: colors.text }]}>Destinacione</Text>
+          <Text style={[styles.tabText, { color: colors.text }, getFontSize(14)]}>Destinacione</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -241,7 +344,7 @@ export default function ClientDashboard({ navigation }) {
           ]}
           onPress={() => setActiveTab("bookings")}
         >
-          <Text style={[styles.tabText, { color: colors.text }]}>Rezervimet</Text>
+          <Text style={[styles.tabText, { color: colors.text }, getFontSize(14)]}>Rezervimet</Text>
         </TouchableOpacity>
       </View>
 
@@ -258,7 +361,7 @@ export default function ClientDashboard({ navigation }) {
             {/* Recent Bookings */}
             {activeBookings.length > 0 && (
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }, getFontSize(18)]}>
                   Rezervimet e mia aktive
                 </Text>
                 {activeBookings.slice(0, 3).map((booking) => (
@@ -267,17 +370,17 @@ export default function ClientDashboard({ navigation }) {
                     style={[styles.bookingCard, { borderColor: colors.border }]}
                   >
                     <View style={styles.bookingHeader}>
-                      <Text style={[styles.bookingRoute, { color: colors.text }]}>
+                      <Text style={[styles.bookingRoute, { color: colors.text }, getFontSize(16)]}>
                         {booking.route?.origin} → {booking.route?.destination}
                       </Text>
-                      <Text style={[styles.bookingStatus, { color: colors.text }]}>
+                      <Text style={[styles.bookingStatus, { color: colors.text }, getFontSize(12)]}>
                         {booking.status === "confirmed" ? "✅ Konfirmuar" : "⏳ Në pritje"}
                       </Text>
                     </View>
-                    <Text style={[styles.bookingDate, { color: colors.text }]}>
+                    <Text style={[styles.bookingDate, { color: colors.text }, getFontSize(14)]}>
                       {formatDate(booking.route?.date)} - {booking.route?.departureTime}
                     </Text>
-                    <Text style={[styles.bookingInfo, { color: colors.text }]}>
+                    <Text style={[styles.bookingInfo, { color: colors.text }, getFontSize(12)]}>
                       {booking.numberOfSeats} vend(e) - {booking.totalPrice} ALL
                     </Text>
                   </View>
@@ -289,11 +392,11 @@ export default function ClientDashboard({ navigation }) {
 
         {activeTab === "routes" && (
           <View style={styles.routesContent}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+            <Text style={[styles.sectionTitle, { color: colors.text }, getFontSize(18)]}>
               Destinacione të disponueshme
             </Text>
             {routes.length === 0 ? (
-              <Text style={[styles.emptyText, { color: colors.text }]}>
+              <Text style={[styles.emptyText, { color: colors.text }, getFontSize(14)]}>
                 Nuk ka destinacione të disponueshme për momentin
               </Text>
             ) : (
@@ -301,44 +404,62 @@ export default function ClientDashboard({ navigation }) {
                 <View key={route._id} style={[styles.routeCard, { borderColor: colors.border }]}>
                   <View style={styles.routeCardContent}>
                     <View style={styles.routeHeader}>
-                      <Text style={[styles.routeTitle, { color: colors.text }]}>
+                      <Text style={[styles.routeTitle, { color: colors.text }, getFontSize(18)]}>
                         {route.origin} → {route.destination}
                       </Text>
-                      <Text style={[styles.routePrice, { color: colors.text }]}>
+                      <Text style={[styles.routePrice, { color: colors.text }, getFontSize(18)]}>
                         {route.price} ALL
                       </Text>
                     </View>
-                    <Text style={[styles.routeInfo, { color: colors.text }]}>
+                    <Text style={[styles.routeInfo, { color: colors.text }, getFontSize(14)]}>
                       📅 {formatDate(route.date)} | 🕐 {route.departureTime} - {route.arrivalTime}
                     </Text>
-                    <Text style={[styles.routeInfo, { color: colors.text }]}>
+                    <Text style={[styles.routeInfo, { color: colors.text }, getFontSize(14)]}>
                       🚐 {route.van?.plateNumber}{route.van?.vanModel ? ` (${route.van.vanModel})` : ""} | {route.availableSeats}/{route.totalSeats || route.van?.capacity || "?"} vende të lira
                     </Text>
                     {route.manager && (
-                      <Text style={[styles.routeInfo, { color: colors.text, fontSize: 12 }]}>
-                        👤 {route.manager?.firstName} {route.manager?.lastName}
-                        {route.manager?.phone ? ` | 📞 ${route.manager.phone}` : ""}
-                      </Text>
+                      <View style={styles.managerInfo}>
+                        <Text style={[styles.routeInfo, { color: colors.text }, getFontSize(12)]}>
+                          👤 {route.manager?.firstName} {route.manager?.lastName}
+                        </Text>
+                        {route.manager?.phone ? (
+                          <TouchableOpacity
+                            onPress={() => handlePhoneCall(route.manager.phone)}
+                            activeOpacity={0.7}
+                            style={{ marginLeft: 8 }}
+                          >
+                            <Text style={[styles.routeInfo, { color: colors.text, textDecorationLine: "underline" }, getFontSize(12)]}>
+                              📞 {route.manager.phone}
+                            </Text>
+                          </TouchableOpacity>
+                        ) : null}
+                      </View>
                     )}
                     {route.availableSeats > 0 ? (
                       <TouchableOpacity
                         style={[styles.bookButton, { backgroundColor: colors.text }]}
                         onPress={() => handleBookRoute(route)}
                       >
-                        <Text style={{ color: colors.background, fontWeight: "bold" }}>
+                        <Text style={[{ color: colors.background, fontWeight: "bold" }, getFontSize(14)]}>
                           Rezervo Vend
                         </Text>
                       </TouchableOpacity>
                     ) : (
                       <View style={[styles.bookButton, { backgroundColor: colors.border }]}>
-                        <Text style={{ color: colors.text }}>I plotë</Text>
+                        <Text style={[{ color: colors.text }, getFontSize(14)]}>I plotë</Text>
                       </View>
                     )}
                   </View>
                   {route.van?.photo ? (
                     <Image
-                      source={{ uri: route.van.photo }}
+                      source={{ uri: getPhotoUri(route.van.photo) }}
                       style={styles.routeVanPhoto}
+                      onError={(error) => {
+                        if (__DEV__) {
+                          console.error("Error loading van photo:", error);
+                        }
+                      }}
+                      resizeMode="cover"
                     />
                   ) : (
                     <View style={[styles.routeVanPhotoPlaceholder, { backgroundColor: colors.border }]}>
@@ -356,7 +477,7 @@ export default function ClientDashboard({ navigation }) {
             {/* Active Bookings */}
             {activeBookings.length > 0 && (
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }, getFontSize(18)]}>
                   Rezervime Aktive ({activeBookings.length})
                 </Text>
                 {activeBookings.map((booking) => (
@@ -365,27 +486,27 @@ export default function ClientDashboard({ navigation }) {
                     style={[styles.bookingCard, { borderColor: colors.border }]}
                   >
                     <View style={styles.bookingHeader}>
-                      <Text style={[styles.bookingRoute, { color: colors.text }]}>
+                      <Text style={[styles.bookingRoute, { color: colors.text }, getFontSize(16)]}>
                         {booking.route?.origin} → {booking.route?.destination}
                       </Text>
-                      <Text style={[styles.bookingStatus, { color: colors.text }]}>
+                      <Text style={[styles.bookingStatus, { color: colors.text }, getFontSize(14)]}>
                         {booking.status === "confirmed" ? "✅" : "⏳"}
                       </Text>
                     </View>
-                    <Text style={[styles.bookingDate, { color: colors.text }]}>
+                    <Text style={[styles.bookingDate, { color: colors.text }, getFontSize(14)]}>
                       {formatDate(booking.route?.date)} - {booking.route?.departureTime}
                     </Text>
-                    <Text style={[styles.bookingInfo, { color: colors.text }]}>
+                    <Text style={[styles.bookingInfo, { color: colors.text }, getFontSize(12)]}>
                       {booking.numberOfSeats} vend(e) - {booking.totalPrice} ALL
                     </Text>
-                    <Text style={[styles.bookingInfo, { color: colors.text }]}>
+                    <Text style={[styles.bookingInfo, { color: colors.text }, getFontSize(12)]}>
                       🚐 {booking.van?.plateNumber}
                     </Text>
                     <TouchableOpacity
                       style={[styles.cancelButton, { borderColor: colors.border }]}
                       onPress={() => handleCancelBooking(booking._id)}
                     >
-                      <Text style={{ color: "red" }}>Anulo Rezervim</Text>
+                      <Text style={[{ color: "red" }, getFontSize(14)]}>Anulo Rezervim</Text>
                     </TouchableOpacity>
                   </View>
                 ))}
@@ -395,7 +516,7 @@ export default function ClientDashboard({ navigation }) {
             {/* Past Bookings */}
             {pastBookings.length > 0 && (
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }, getFontSize(18)]}>
                   Rezervime të kaluara ({pastBookings.length})
                 </Text>
                 {pastBookings.map((booking) => (
@@ -404,17 +525,17 @@ export default function ClientDashboard({ navigation }) {
                     style={[styles.bookingCard, { borderColor: colors.border, opacity: 0.7 }]}
                   >
                     <View style={styles.bookingHeader}>
-                      <Text style={[styles.bookingRoute, { color: colors.text }]}>
+                      <Text style={[styles.bookingRoute, { color: colors.text }, getFontSize(16)]}>
                         {booking.route?.origin} → {booking.route?.destination}
                       </Text>
-                      <Text style={[styles.bookingStatus, { color: colors.text }]}>
+                      <Text style={[styles.bookingStatus, { color: colors.text }, getFontSize(14)]}>
                         {booking.status === "completed" ? "✅" : "❌"}
                       </Text>
                     </View>
-                    <Text style={[styles.bookingDate, { color: colors.text }]}>
+                    <Text style={[styles.bookingDate, { color: colors.text }, getFontSize(14)]}>
                       {formatDate(booking.route?.date)} - {booking.route?.departureTime}
                     </Text>
-                    <Text style={[styles.bookingInfo, { color: colors.text }]}>
+                    <Text style={[styles.bookingInfo, { color: colors.text }, getFontSize(12)]}>
                       {booking.numberOfSeats} vend(e) - {booking.totalPrice} ALL
                     </Text>
                   </View>
@@ -423,7 +544,7 @@ export default function ClientDashboard({ navigation }) {
             )}
 
             {bookings.length === 0 && (
-              <Text style={[styles.emptyText, { color: colors.text }]}>
+              <Text style={[styles.emptyText, { color: colors.text }, getFontSize(14)]}>
                 Nuk ke rezervime akoma
               </Text>
             )}
@@ -588,6 +709,11 @@ const styles = StyleSheet.create({
   routeInfo: {
     fontSize: 14,
     marginBottom: 4,
+  },
+  managerInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
   },
   bookButton: {
     padding: 12,

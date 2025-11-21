@@ -1,9 +1,11 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useState, useContext } from "react";
 import { Appearance } from "react-native";
+import { SettingsContext } from "./SettingsContext";
 
 export const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
+  const settingsContext = useContext(SettingsContext);
   const systemTheme = Appearance.getColorScheme();
   const [theme, setTheme] = useState(systemTheme || "light");
 
@@ -31,8 +33,34 @@ export function ThemeProvider({ children }) {
 
   const colors = theme === "light" ? lightColors : darkColors;
 
+  // Get font size multiplier from settings
+  const getFontSizeMultiplier = () => {
+    if (!settingsContext) return 1.0;
+    return settingsContext.getFontSizeMultiplier();
+  };
+
+  // Helper function to get scaled font size
+  const getScaledFontSize = (baseSize) => {
+    return baseSize * getFontSizeMultiplier();
+  };
+
+  // Helper function to get font family from settings
+  const getFontFamily = () => {
+    if (!settingsContext) return "System";
+    return settingsContext.getFontFamily();
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, colors, toggleTheme }}>
+    <ThemeContext.Provider 
+      value={{ 
+        theme, 
+        colors, 
+        toggleTheme,
+        getScaledFontSize,
+        getFontSizeMultiplier,
+        getFontFamily,
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );

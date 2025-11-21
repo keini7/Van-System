@@ -66,7 +66,7 @@ app.get("/health", (req, res) => {
 // Endpoint për të marrë IP-në e kompjuterit (për frontend)
 app.get("/api/config/ip", (req, res) => {
   const ip = getNetworkIP();
-  res.json({ ip, port: Number(process.env.PORT) || 5000 });
+  res.json({ ip, port: Number(process.env.PORT) || 5001 });
 });
 
 // API Routes
@@ -100,7 +100,7 @@ app.use((req, res) => {
 // Error handler (must be last)
 app.use(errorHandler);
 
-const PORT = Number(process.env.PORT) || 5000;
+const PORT = Number(process.env.PORT) || 5001;
 const HOST = "0.0.0.0";
 
 /**
