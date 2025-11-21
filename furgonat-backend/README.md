@@ -9,13 +9,7 @@ Backend API për sistemin e rezervimit të furgonave.
 npm install
 ```
 
-2. Krijo `.env` file (kopjo nga `env-template.txt` ose krijo manualisht):
-```bash
-# Nëse ke env-template.txt lokal, kopjoje:
-cp env-template.txt .env
-
-# Ose krijo manualisht .env me këto variabla:
-```
+2. Krijo `.env` file me këto variabla:
 
 3. Konfiguro `.env`:
 ```env
