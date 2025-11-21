@@ -15,7 +15,6 @@ Sistem për rezervimin e furgonave. Ka dy lloje përdoruesish: user i thjeshtë 
 cd furgonat-backend
 npm install
 cp env-template.txt .env
-# Edito .env dhe vendos MongoDB URI dhe JWT_SECRET
 npm run dev
 ```
 
