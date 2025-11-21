@@ -4,8 +4,7 @@
   "description": "Backend for Furgonat project",
   "main": "dist/index.js",
   "scripts": {
-    "setup-env": "node scripts/setup-env.js",
-    "dev": "npm run setup-env && ts-node-dev --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "tsc",
     "start": "node dist/index.js"
   },
