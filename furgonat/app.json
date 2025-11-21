@@ -3,7 +3,30 @@
     "name": "Furgonat",
     "slug": "furgonat",
     "version": "1.0.0",
+    "sdkVersion": "54.0.0",
     "jsEngine": "jsc",
-    "assetBundlePatterns": ["**/*"]
+    "assetBundlePatterns": ["**/*"],
+    "plugins": [
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Aplikacioni ka nevojë për akses në galerinë tuaj për të zgjedhur foto të furgonit.",
+          "cameraPermission": "Aplikacioni ka nevojë për akses në kamerën tuaj për të bërë foto të furgonit."
+        }
+      ]
+    ],
+    "ios": {
+      "infoPlist": {
+        "NSCameraUsageDescription": "Aplikacioni ka nevojë për akses në kamerën tuaj për të bërë foto të furgonit.",
+        "NSPhotoLibraryUsageDescription": "Aplikacioni ka nevojë për akses në galerinë tuaj për të zgjedhur foto të furgonit."
+      }
+    },
+    "android": {
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE"
+      ]
+    }
   }
 }

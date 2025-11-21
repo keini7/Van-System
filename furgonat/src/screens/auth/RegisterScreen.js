@@ -8,14 +8,17 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Alert,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { ThemeContext } from "../../context/ThemeContext";
+import { AuthContext } from "../../context/AuthContext";
 import { Picker } from "@react-native-picker/picker";
-import ThemeButton from "../../components/ThemeButton";
 
 export default function RegisterScreen({ navigation }) {
   const { colors } = useContext(ThemeContext);
+  const { register } = useContext(AuthContext);
 
   const [step, setStep] = useState(0);
   const [role, setRole] = useState(null);
@@ -30,17 +33,24 @@ export default function RegisterScreen({ navigation }) {
   const [birthdate, setBirthdate] = useState(null);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [plateNumber, setPlateNumber] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const plateRegex = /^[A-Z]{2}[0-9]{3}[A-Z]{2}$/;
 
   const handleRegister = async () => {
+    // Validation
     if (role === "manager" && !plateRegex.test(plateNumber)) {
-      alert("Plate number duhet të jetë në formatin AA123BB");
+      Alert.alert("Error", "Plate number duhet të jetë në formatin AA123BB");
       return;
     }
 
     if (password !== confirmPassword) {
-      alert("Passwords nuk përputhen!");
+      Alert.alert("Error", "Passwords nuk përputhen!");
+      return;
+    }
+
+    if (password.length < 6) {
+      Alert.alert("Error", "Password duhet të jetë të paktën 6 karaktere");
       return;
     }
 
@@ -56,24 +66,16 @@ export default function RegisterScreen({ navigation }) {
       ...(role === "manager" && { plate_number: plateNumber.toUpperCase() }),
     };
 
-    try {
-      const res = await fetch("http://localhost:5000/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+    setLoading(true);
+    const result = await register(body);
+    setLoading(false);
 
-      const data = await res.json();
-
-      if (res.ok) {
-        alert("User registered successfully!");
-        navigation.navigate("Login");
-      } else {
-        alert(data.error || "Registration failed");
-      }
-    } catch (err) {
-      console.error("Register error:", err);
-      alert("Network error");
+    if (result.success) {
+      Alert.alert("Success", result.message || "User registered successfully!", [
+        { text: "OK", onPress: () => navigation.navigate("Login") }
+      ]);
+    } else {
+      Alert.alert("Registration Failed", result.error || "Please try again");
     }
   };
 
@@ -83,13 +85,14 @@ export default function RegisterScreen({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: colors.background }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 80 : 0}
-    >
-      {step === 0 ? (
-        <View style={styles.container}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top", "bottom"]}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
+      >
+        {step === 0 ? (
+          <View style={styles.container}>
           <Text style={[styles.title, { color: colors.text }]}>
             Register as:
           </Text>
@@ -120,14 +123,20 @@ export default function RegisterScreen({ navigation }) {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => navigation.navigate("Login")}
-            style={{ marginTop: 20 }}
-          >
-            <Text style={{ color: colors.link }}>
-              Already have an account? Login
+          <View style={styles.loginContainer}>
+            <Text style={[styles.loginText, { color: colors.text, opacity: 0.7 }]}>
+              Ke tashmë llogari?
             </Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => navigation.navigate("Login")}
+              style={[styles.loginButton, { borderColor: colors.border }]}
+              activeOpacity={0.7}
+            >
+              <Text style={[styles.loginButtonText, { color: colors.text }]}>
+                Hyr në llogari
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       ) : (
         <ScrollView
@@ -187,18 +196,76 @@ export default function RegisterScreen({ navigation }) {
           />
 
           {/* Gender */}
-          <View style={[styles.input, { padding: 0 }]}>
-            <Picker
-              selectedValue={gender}
-              onValueChange={(value) => setGender(value)}
-              dropdownIconColor={colors.text}
-              style={{ color: colors.text }}
-            >
-              <Picker.Item label="Zgjidh gjininë" value="" />
-              <Picker.Item label="Mashkull" value="male" />
-              <Picker.Item label="Femër" value="female" />
-              <Picker.Item label="Preferoj të mos e them" value="prefer_not" />
-            </Picker>
+          <View style={styles.genderContainer}>
+            <Text style={[styles.genderLabel, { color: colors.text }]}>Gjinia</Text>
+            <View style={styles.genderButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.genderButton,
+                  {
+                    backgroundColor: gender === "male" ? colors.primary : colors.border,
+                    borderColor: gender === "male" ? colors.primary : colors.border,
+                  },
+                ]}
+                onPress={() => setGender("male")}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.genderButtonText,
+                    {
+                      color: gender === "male" ? "#FFFFFF" : colors.text,
+                    },
+                  ]}
+                >
+                  👨 Mashkull
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.genderButton,
+                  {
+                    backgroundColor: gender === "female" ? colors.primary : colors.border,
+                    borderColor: gender === "female" ? colors.primary : colors.border,
+                  },
+                ]}
+                onPress={() => setGender("female")}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.genderButtonText,
+                    {
+                      color: gender === "female" ? "#FFFFFF" : colors.text,
+                    },
+                  ]}
+                >
+                  👩 Femër
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[
+                  styles.genderButton,
+                  {
+                    backgroundColor: gender === "prefer_not" ? colors.primary : colors.border,
+                    borderColor: gender === "prefer_not" ? colors.primary : colors.border,
+                  },
+                ]}
+                onPress={() => setGender("prefer_not")}
+                activeOpacity={0.7}
+              >
+                <Text
+                  style={[
+                    styles.genderButtonText,
+                    {
+                      color: gender === "prefer_not" ? "#FFFFFF" : colors.text,
+                    },
+                  ]}
+                >
+                  🚫 Preferoj të mos e them
+                </Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* Birthdate */}
@@ -261,22 +328,33 @@ export default function RegisterScreen({ navigation }) {
 
           {/* Register Button */}
           <TouchableOpacity
-            style={[styles.button, { backgroundColor: colors.text }]}
+            style={[
+              styles.button, 
+              { 
+                backgroundColor: loading ? colors.border : colors.text,
+                opacity: loading ? 0.6 : 1,
+              }
+            ]}
             onPress={handleRegister}
+            disabled={loading}
           >
             <Text style={{ color: colors.background, fontWeight: "bold" }}>
-              Register
+              {loading ? "Registering..." : "Register"}
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => setStep(0)}>
-            <Text style={{ color: colors.link, marginTop: 10 }}>⬅ Back</Text>
+          <TouchableOpacity
+            onPress={() => setStep(0)}
+            style={[styles.backButton, { borderColor: colors.border }]}
+            activeOpacity={0.7}
+          >
+            <Text style={[styles.backButtonIcon, { color: colors.text }]}>←</Text>
+            <Text style={[styles.backButtonText, { color: colors.text }]}>Kthehu</Text>
           </TouchableOpacity>
         </ScrollView>
-      )}
-
-      <ThemeButton />
-    </KeyboardAvoidingView>
+        )}
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
@@ -285,6 +363,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     padding: 20,
+    paddingTop: Platform.OS === "ios" ? 20 : 20,
   },
   title: {
     fontSize: 22,
@@ -303,5 +382,74 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: "center",
     marginTop: 10,
+  },
+  loginContainer: {
+    marginTop: 24,
+    alignItems: "center",
+  },
+  loginText: {
+    fontSize: 14,
+    marginBottom: 12,
+  },
+  loginButton: {
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    minWidth: 200,
+    alignItems: "center",
+  },
+  loginButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  genderContainer: {
+    marginBottom: 12,
+  },
+  genderLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  genderButtons: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  genderButton: {
+    flex: 1,
+    minWidth: "30%",
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  genderButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    textAlign: "center",
+  },
+  backButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    borderWidth: 1.5,
+    marginTop: 16,
+    alignSelf: "center",
+    minWidth: 120,
+  },
+  backButtonIcon: {
+    fontSize: 20,
+    marginRight: 8,
+    fontWeight: "bold",
+  },
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
 });

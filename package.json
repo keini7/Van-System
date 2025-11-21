@@ -1,0 +1,16 @@
+{
+  "name": "van-system",
+  "version": "1.0.0",
+  "description": "Van System - Frontend and Backend",
+  "scripts": {
+    "dev": "cd furgonat-backend && npm run dev",
+    "dev:backend": "cd furgonat-backend && npm run dev",
+    "dev:frontend": "cd furgonat && npm start",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "install:all": "npm install && cd furgonat-backend && npm install && cd ../furgonat && npm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+

@@ -1,16 +1,17 @@
 import React, { useContext } from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Platform } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { ThemeContext } from "../../context/ThemeContext";
-import ThemeButton from "../../components/ThemeButton";
 
 export default function WelcomeScreen({ navigation }) {
   const { colors } = useContext(ThemeContext);
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Text style={[styles.title, { color: colors.text }]}>
-        Mirësevini te Furgonat
-      </Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={["top", "bottom"]}>
+      <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <Text style={[styles.title, { color: colors.text }]}>
+          Mirësevini te Furgonat
+        </Text>
 
       <TouchableOpacity
         style={[styles.button, { backgroundColor: colors.text }]}
@@ -29,15 +30,19 @@ export default function WelcomeScreen({ navigation }) {
           Register
         </Text>
       </TouchableOpacity>
-
-      {/* Butoni poshtë djathtas */}
-      <ThemeButton />
-    </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", alignItems: "center", padding: 20 },
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+    paddingTop: Platform.OS === "ios" ? 20 : 20,
+  },
   title: { fontSize: 24, fontWeight: "bold", marginBottom: 40 },
   button: {
     padding: 15,

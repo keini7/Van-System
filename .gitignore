@@ -1,30 +1,154 @@
-# FRONTEND (React / React Native)
+# ============================================
+# ENVIRONMENT VARIABLES & SECRETS
+# ============================================
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+*.env
+
+# ============================================
+# FRONTEND (React Native / Expo)
+# ============================================
 furgonat/node_modules/
+furgonat/.expo/
+furgonat/.expo-shared/
 furgonat/dist/
 furgonat/build/
 furgonat/.expo/
-furgonat/.env
-furgonat/.env.local
-furgonat/.env.*.local
+furgonat/web-build/
+furgonat/.expo-shared/
+furgonat/.metro/
+furgonat/.next/
+furgonat/.cache/
 
-# BACKEND (Node.js / TypeScript / Express)
+# Expo
+.expo/
+.expo-shared/
+.expo/
+
+# ============================================
+# BACKEND (Node.js / TypeScript)
+# ============================================
 furgonat-backend/node_modules/
 furgonat-backend/dist/
 furgonat-backend/build/
 furgonat-backend/.env
+furgonat-backend/*.log
 
-# Logs
+# TypeScript
+*.tsbuildinfo
+
+# ============================================
+# ROOT LEVEL
+# ============================================
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ============================================
+# LOGS
+# ============================================
+logs/
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
+lerna-debug.log*
 
-# IDE & System
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
+# ============================================
+# RUNTIME & CACHE
+# ============================================
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+.stylelintcache
+.rpt2_cache/
+.rts2_cache_cjs/
+.rts2_cache_es/
+.rts2_cache_umd/
 
-# Tests
+# ============================================
+# TESTING
+# ============================================
 coverage/
 *.lcov
+.nyc_output/
+.jest/
+
+# ============================================
+# IDE & EDITORS
+# ============================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*.sublime-project
+*.sublime-workspace
+
+# ============================================
+# OS SPECIFIC
+# ============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+.directory
+.Trash-*
+
+# ============================================
+# TEMPORARY FILES
+# ============================================
+*.tmp
+*.temp
+*.bak
+*.backup
+*.swp
+*.swo
+*~
+
+# ============================================
+# BUILD ARTIFACTS
+# ============================================
+*.map
+*.min.js
+*.min.css
+
+# ============================================
+# DATABASE
+# ============================================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+
+# ============================================
+# MISC
+# ============================================
+.vercel
+.netlify
+.turbo
