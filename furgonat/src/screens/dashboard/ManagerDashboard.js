@@ -13,6 +13,8 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   Image,
+  Modal,
+  Linking,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
@@ -22,7 +24,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { getApiEndpoints } from "../../config/api";
 
 export default function ManagerDashboard({ navigation }) {
-  const { colors } = useContext(ThemeContext);
+  const { colors, getScaledFontSize, getFontFamily } = useContext(ThemeContext);
   const { user, logout, isTokenValid } = useContext(AuthContext);
 
   useEffect(() => {
@@ -72,6 +74,7 @@ export default function ManagerDashboard({ navigation }) {
   });
   const [showScheduleDepartureTimePicker, setShowScheduleDepartureTimePicker] = useState(false);
   const [showScheduleArrivalTimePicker, setShowScheduleArrivalTimePicker] = useState(false);
+  const [showClientsModal, setShowClientsModal] = useState(false);
 
   useEffect(() => {
     if (user?.token) {
@@ -464,6 +467,66 @@ export default function ManagerDashboard({ navigation }) {
     return days[dayIndex] || "Unknown";
   };
 
+  // Helper to get font style with both size and family
+  const getFontStyle = (baseSize) => ({ 
+    fontSize: getScaledFontSize(baseSize),
+    fontFamily: getFontFamily(),
+  });
+  
+  // Keep getFontSize for backward compatibility, but include font family
+  const getFontSize = (baseSize) => getFontStyle(baseSize);
+
+  // Get unique clients from bookings
+  const getUniqueClients = () => {
+    const clientsMap = new Map();
+    bookings.forEach((booking) => {
+      if (booking.user) {
+        const userId = booking.user._id || booking.user.id;
+        if (!clientsMap.has(userId)) {
+          clientsMap.set(userId, {
+            id: userId,
+            name: `${booking.user.firstName || ""} ${booking.user.lastName || ""}`.trim() || booking.user.email || "Unknown",
+            phone: booking.user.phone || booking.passengerPhone || "N/A",
+            email: booking.user.email || "N/A",
+          });
+        }
+      }
+    });
+    return Array.from(clientsMap.values());
+  };
+
+  // Handle phone call
+  const handlePhoneCall = (phoneNumber) => {
+    if (!phoneNumber || phoneNumber === "N/A") {
+      Alert.alert("Gabim", "Numri i telefonit nuk është i disponueshëm");
+      return;
+    }
+
+    // Clean phone number (remove spaces, dashes, etc.)
+    const cleanPhone = phoneNumber.replace(/[\s\-\(\)]/g, "");
+    
+    // Check if phone number is valid
+    if (cleanPhone.length < 3) {
+      Alert.alert("Gabim", "Numri i telefonit nuk është i vlefshëm");
+      return;
+    }
+
+    const phoneUrl = `tel:${cleanPhone}`;
+    
+    Linking.canOpenURL(phoneUrl)
+      .then((supported) => {
+        if (supported) {
+          return Linking.openURL(phoneUrl);
+        } else {
+          Alert.alert("Gabim", "Aplikacioni i telefonit nuk është i disponueshëm");
+        }
+      })
+      .catch((err) => {
+        console.error("Error opening phone dialer:", err);
+        Alert.alert("Gabim", "Dështoi hapja e aplikacionit të telefonit");
+      });
+  };
+
   const handleEditSchedule = (schedule) => {
     setEditingSchedule(schedule);
     setScheduleForm({
@@ -634,7 +697,7 @@ export default function ManagerDashboard({ navigation }) {
     <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["top"]}>
       {/* Header */}
       <View style={[styles.header, { borderBottomColor: colors.border }]}>
-        <Text style={[styles.headerTitle, { color: colors.text }]}>
+        <Text style={[styles.headerTitle, { color: colors.text }, getFontSize(20)]}>
           {dashboardData?.user?.firstName || user?.email}
         </Text>
         <View style={styles.headerButtons}>
@@ -677,7 +740,7 @@ export default function ManagerDashboard({ navigation }) {
           ]}
           onPress={() => setActiveTab("home")}
         >
-          <Text style={[styles.tabText, { color: colors.text }]}>Kryefaqja</Text>
+          <Text style={[styles.tabText, { color: colors.text }, getFontSize(14)]}>Kryefaqja</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -686,7 +749,7 @@ export default function ManagerDashboard({ navigation }) {
           ]}
           onPress={() => setActiveTab("vans")}
         >
-          <Text style={[styles.tabText, { color: colors.text }]}>Furgonat</Text>
+          <Text style={[styles.tabText, { color: colors.text }, getFontSize(14)]}>Furgonat</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -695,7 +758,7 @@ export default function ManagerDashboard({ navigation }) {
           ]}
           onPress={() => setActiveTab("schedules")}
         >
-          <Text style={[styles.tabText, { color: colors.text }]}>Orarë fikse</Text>
+          <Text style={[styles.tabText, { color: colors.text }, getFontSize(14)]}>Orarë fikse</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -704,7 +767,7 @@ export default function ManagerDashboard({ navigation }) {
           ]}
           onPress={() => setActiveTab("bookings")}
         >
-          <Text style={[styles.tabText, { color: colors.text }]}>Rezervimet</Text>
+          <Text style={[styles.tabText, { color: colors.text }, getFontSize(14)]}>Rezervimet</Text>
         </TouchableOpacity>
       </View>
 
@@ -720,12 +783,12 @@ export default function ManagerDashboard({ navigation }) {
           <View style={styles.homeContent}>
             {/* Quick Actions */}
             <View style={styles.section}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Veprime të shpejta</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }, getFontSize(18)]}>Veprime të shpejta</Text>
               <TouchableOpacity
                 style={[styles.actionButton, { backgroundColor: colors.text }]}
                 onPress={() => setShowVanForm(true)}
               >
-                <Text style={{ color: colors.background, fontWeight: "bold" }}>
+                <Text style={[{ color: colors.background, fontWeight: "bold" }, getFontSize(14)]}>
                   + Shto Furgon të ri
                 </Text>
               </TouchableOpacity>
@@ -739,8 +802,16 @@ export default function ManagerDashboard({ navigation }) {
                   setShowScheduleForm(true);
                 }}
               >
-                <Text style={{ color: colors.background, fontWeight: "bold" }}>
+                <Text style={[{ color: colors.background, fontWeight: "bold" }, getFontSize(14)]}>
                   + Shto Orar të ri
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.actionButton, { backgroundColor: colors.border, borderWidth: 1, borderColor: colors.text }]}
+                onPress={() => setShowClientsModal(true)}
+              >
+                <Text style={{ color: colors.text, fontWeight: "bold" }}>
+                  👥 Klientet ({getUniqueClients().length})
                 </Text>
               </TouchableOpacity>
             </View>
@@ -748,7 +819,7 @@ export default function ManagerDashboard({ navigation }) {
             {/* Active Schedules */}
             {schedules.filter(s => s.isActive).length > 0 && (
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.text }]}>
+                <Text style={[styles.sectionTitle, { color: colors.text }, getFontSize(18)]}>
                   Orarët e mia aktive ({schedules.filter(s => s.isActive).length})
                 </Text>
                 {schedules
@@ -758,13 +829,13 @@ export default function ManagerDashboard({ navigation }) {
                     <View key={schedule._id} style={[styles.scheduleCard, { borderColor: colors.border }]}>
                       <View style={styles.scheduleContent}>
                         <View style={{ flex: 1 }}>
-                          <Text style={[styles.scheduleTitle, { color: colors.text }]}>
+                          <Text style={[styles.scheduleTitle, { color: colors.text }, getFontSize(18)]}>
                             🚐 {schedule.van?.plateNumber} → {schedule.destination}
                           </Text>
-                          <Text style={[styles.scheduleInfo, { color: colors.text }]}>
+                          <Text style={[styles.scheduleInfo, { color: colors.text }, getFontSize(14)]}>
                             🕐 {schedule.departureTime} - {schedule.arrivalTime} | 💰 {schedule.price} ALL
                           </Text>
-                          <Text style={[styles.scheduleInfo, { color: colors.text }]}>
+                          <Text style={[styles.scheduleInfo, { color: colors.text }, getFontSize(14)]}>
                             📅 {schedule.daysOfWeek && schedule.daysOfWeek.length > 0
                               ? schedule.daysOfWeek.map(day => getDayName(day)).join(", ")
                               : "Çdo ditë"}
@@ -799,7 +870,7 @@ export default function ManagerDashboard({ navigation }) {
         {activeTab === "vans" && (
           <View style={styles.vansContent}>
             <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Furgonat e mia</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }, getFontSize(18)]}>Furgonat e mia</Text>
               <TouchableOpacity
                 style={[styles.addButton, { backgroundColor: colors.text }]}
                 onPress={() => setShowVanForm(true)}
@@ -809,23 +880,23 @@ export default function ManagerDashboard({ navigation }) {
             </View>
 
             {vans.length === 0 ? (
-              <Text style={[styles.emptyText, { color: colors.text }]}>
+              <Text style={[styles.emptyText, { color: colors.text }, getFontSize(14)]}>
                 Nuk ke furgonat akoma. Shto një furgon për të filluar.
               </Text>
             ) : (
               vans.map((van) => (
                 <View key={van._id} style={[styles.vanCard, { borderColor: colors.border }]}>
                   <View style={styles.vanCardContent}>
-                    <Text style={[styles.vanPlate, { color: colors.text }]}>
+                    <Text style={[styles.vanPlate, { color: colors.text }, getFontSize(18)]}>
                       🚐 {van.plateNumber}
                     </Text>
                     {van.vanModel && (
-                      <Text style={[styles.vanInfo, { color: colors.text }]}>Model: {van.vanModel}</Text>
+                      <Text style={[styles.vanInfo, { color: colors.text }, getFontSize(14)]}>Model: {van.vanModel}</Text>
                     )}
-                    <Text style={[styles.vanInfo, { color: colors.text }]}>
+                    <Text style={[styles.vanInfo, { color: colors.text }, getFontSize(14)]}>
                       Kapacitet: {van.capacity} vende
                     </Text>
-                    <Text style={[styles.vanStatus, { color: colors.text }]}>
+                    <Text style={[styles.vanStatus, { color: colors.text }, getFontSize(14)]}>
                       Status: {van.status === "active" ? "✅ Aktiv" : "⏸️ Jo aktiv"}
                     </Text>
                   </View>
@@ -847,11 +918,21 @@ export default function ManagerDashboard({ navigation }) {
 
         {activeTab === "bookings" && (
           <View style={styles.bookingsContent}>
-            <Text style={[styles.sectionTitle, { color: colors.text }]}>
-              Rezervimet ({bookings.length})
-            </Text>
+            <View style={styles.sectionHeader}>
+              <Text style={[styles.sectionTitle, { color: colors.text }, getFontSize(18)]}>
+                Rezervimet ({bookings.length})
+              </Text>
+              <TouchableOpacity
+                style={[styles.clientsButton, { backgroundColor: colors.border, borderWidth: 1, borderColor: colors.text }]}
+                onPress={() => setShowClientsModal(true)}
+              >
+                <Text style={{ color: colors.text, fontWeight: "bold", fontSize: 14 }}>
+                  👥 Klientet ({getUniqueClients().length})
+                </Text>
+              </TouchableOpacity>
+            </View>
             {bookings.length === 0 ? (
-              <Text style={[styles.emptyText, { color: colors.text }]}>
+              <Text style={[styles.emptyText, { color: colors.text }, getFontSize(14)]}>
                 Nuk ka rezervime akoma
               </Text>
             ) : (
@@ -861,23 +942,23 @@ export default function ManagerDashboard({ navigation }) {
                   style={[styles.bookingCard, { borderColor: colors.border }]}
                 >
                   <View style={styles.bookingHeader}>
-                    <Text style={[styles.bookingRoute, { color: colors.text }]}>
+                    <Text style={[styles.bookingRoute, { color: colors.text }, getFontSize(16)]}>
                       {booking.route?.origin} → {booking.route?.destination}
                     </Text>
-                    <Text style={[styles.bookingStatus, { color: colors.text }]}>
+                    <Text style={[styles.bookingStatus, { color: colors.text }, getFontSize(14)]}>
                       {booking.status === "confirmed" ? "✅" : booking.status === "pending" ? "⏳" : "❌"}
                     </Text>
                   </View>
-                  <Text style={[styles.bookingDate, { color: colors.text }]}>
+                  <Text style={[styles.bookingDate, { color: colors.text }, getFontSize(14)]}>
                     {formatDate(booking.route?.date)} - {booking.route?.departureTime}
                   </Text>
-                  <Text style={[styles.bookingInfo, { color: colors.text }]}>
+                  <Text style={[styles.bookingInfo, { color: colors.text }, getFontSize(14)]}>
                     👤 {booking.user?.firstName} {booking.user?.lastName}
                   </Text>
-                  <Text style={[styles.bookingInfo, { color: colors.text }]}>
+                  <Text style={[styles.bookingInfo, { color: colors.text }, getFontSize(14)]}>
                     📞 {booking.user?.phone || booking.user?.email}
                   </Text>
-                  <Text style={[styles.bookingInfo, { color: colors.text }]}>
+                  <Text style={[styles.bookingInfo, { color: colors.text }, getFontSize(14)]}>
                     {booking.numberOfSeats} vend(e) - {booking.totalPrice} ALL
                   </Text>
                 </View>
@@ -889,7 +970,7 @@ export default function ManagerDashboard({ navigation }) {
         {activeTab === "schedules" && (
           <View style={styles.schedulesContent}>
             <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Orarë fikse</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }, getFontSize(18)]}>Orarë fikse</Text>
               <TouchableOpacity
                 style={[styles.addButton, { backgroundColor: colors.text }]}
                 onPress={() => {
@@ -905,7 +986,7 @@ export default function ManagerDashboard({ navigation }) {
             </View>
 
             {schedules.length === 0 ? (
-              <Text style={[styles.emptyText, { color: colors.text }]}>
+              <Text style={[styles.emptyText, { color: colors.text }, getFontSize(14)]}>
                 Nuk ke orarë fikse akoma. Krijoni një orar për të filluar.
               </Text>
             ) : (
@@ -913,16 +994,16 @@ export default function ManagerDashboard({ navigation }) {
                 <View key={schedule._id} style={[styles.scheduleCard, { borderColor: colors.border }]}>
                   <View style={styles.scheduleContent}>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.scheduleTitle, { color: colors.text }]}>
+                      <Text style={[styles.scheduleTitle, { color: colors.text }, getFontSize(18)]}>
                         Pogradec → {schedule.destination}
                       </Text>
-                      <Text style={[styles.scheduleInfo, { color: colors.text }]}>
+                      <Text style={[styles.scheduleInfo, { color: colors.text }, getFontSize(14)]}>
                         🕐 {schedule.departureTime} - {schedule.arrivalTime} | 💰 {schedule.price} ALL
                       </Text>
-                      <Text style={[styles.scheduleInfo, { color: colors.text }]}>
+                      <Text style={[styles.scheduleInfo, { color: colors.text }, getFontSize(14)]}>
                         🚐 {schedule.van?.plateNumber}
                       </Text>
-                      <Text style={[styles.scheduleInfo, { color: colors.text }]}>
+                      <Text style={[styles.scheduleInfo, { color: colors.text }, getFontSize(14)]}>
                         📅 {schedule.daysOfWeek && schedule.daysOfWeek.length > 0
                           ? schedule.daysOfWeek.map(day => getDayName(day)).join(", ")
                           : "Çdo ditë"}
@@ -960,7 +1041,7 @@ export default function ManagerDashboard({ navigation }) {
                         style={[styles.createRouteButton, { borderColor: colors.border }]}
                         onPress={() => handleCreateRouteFromSchedule(schedule._id)}
                       >
-                        <Text style={{ color: colors.text }}>Krijo route</Text>
+                        <Text style={[{ color: colors.text }, getFontSize(14)]}>Krijo route</Text>
                       </TouchableOpacity>
                     )}
                     <TouchableOpacity
@@ -1047,13 +1128,13 @@ export default function ManagerDashboard({ navigation }) {
                   setVanForm({ plateNumber: "", model: "", capacity: "15", photo: null });
                 }}
               >
-                <Text style={{ color: colors.text }}>Anulo</Text>
+                <Text style={[{ color: colors.text }, getFontSize(14)]}>Anulo</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: colors.text }]}
                 onPress={handleCreateVan}
               >
-                <Text style={{ color: colors.background, fontWeight: "bold" }}>Krijo</Text>
+                <Text style={[{ color: colors.background, fontWeight: "bold" }, getFontSize(14)]}>Krijo</Text>
               </TouchableOpacity>
             </View>
             </View>
@@ -1249,7 +1330,7 @@ export default function ManagerDashboard({ navigation }) {
                         });
                       }}
                     >
-                      <Text style={{ color: colors.text }}>Anulo</Text>
+                      <Text style={[{ color: colors.text }, getFontSize(14)]}>Anulo</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
                       style={[styles.modalButton, { backgroundColor: colors.text }]}
@@ -1258,7 +1339,7 @@ export default function ManagerDashboard({ navigation }) {
                         handleCreateSchedule();
                       }}
                     >
-                      <Text style={{ color: colors.background, fontWeight: "bold" }}>
+                      <Text style={[{ color: colors.background, fontWeight: "bold" }, getFontSize(14)]}>
                         {editingSchedule ? "Ruaj" : "Krijo"}
                       </Text>
                     </TouchableOpacity>
@@ -1309,18 +1390,78 @@ export default function ManagerDashboard({ navigation }) {
                   setRouteDateFromSchedule("");
                 }}
               >
-                <Text style={{ color: colors.text }}>Anulo</Text>
+                <Text style={[{ color: colors.text }, getFontSize(14)]}>Anulo</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.modalButton, { backgroundColor: colors.text }]}
                 onPress={confirmCreateRouteFromSchedule}
               >
-                <Text style={{ color: colors.background, fontWeight: "bold" }}>Krijo</Text>
+                <Text style={[{ color: colors.background, fontWeight: "bold" }, getFontSize(14)]}>Krijo</Text>
               </TouchableOpacity>
             </View>
           </View>
         </View>
       )}
+
+      {/* Clients Modal */}
+      <Modal
+        visible={showClientsModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setShowClientsModal(false)}
+      >
+        <View style={[styles.modalOverlay, { backgroundColor: "rgba(0,0,0,0.5)" }]}>
+          <View style={[styles.modalContent, { backgroundColor: colors.background, maxHeight: "80%" }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Klientet</Text>
+              <TouchableOpacity
+                onPress={() => setShowClientsModal(false)}
+                style={[styles.closeButton, { backgroundColor: colors.border }]}
+              >
+                <Text style={{ color: colors.text, fontSize: 20, fontWeight: "bold" }}>×</Text>
+              </TouchableOpacity>
+            </View>
+            
+            <ScrollView style={styles.clientsList}>
+              {getUniqueClients().length === 0 ? (
+                <Text style={[styles.emptyText, { color: colors.text, textAlign: "center", marginTop: 20 }, getFontSize(14)]}>
+                  Nuk ka klientë akoma
+                </Text>
+              ) : (
+                getUniqueClients().map((client, index) => (
+                  <View
+                    key={client.id || index}
+                    style={[styles.clientCard, { borderColor: colors.border, backgroundColor: colors.background }]}
+                  >
+                    <Text style={[styles.clientName, { color: colors.text }, getFontSize(18)]}>
+                      👤 {client.name}
+                    </Text>
+                    {client.phone && client.phone !== "N/A" ? (
+                      <TouchableOpacity
+                        onPress={() => handlePhoneCall(client.phone)}
+                        activeOpacity={0.7}
+                      >
+                        <Text style={[styles.clientPhone, { color: colors.text, textDecorationLine: "underline" }, getFontSize(16)]}>
+                          📞 {client.phone}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <Text style={[styles.clientPhone, { color: colors.text, opacity: 0.5 }, getFontSize(16)]}>
+                        📞 N/A
+                      </Text>
+                    )}
+                    {client.email && client.email !== "N/A" && (
+                      <Text style={[styles.clientEmail, { color: colors.text }, getFontSize(14)]}>
+                        ✉️ {client.email}
+                      </Text>
+                    )}
+                  </View>
+                ))
+              )}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
 
       {/* Theme Button */}
     </SafeAreaView>
@@ -1716,5 +1857,52 @@ const styles = StyleSheet.create({
     padding: 10,
     alignItems: "center",
     marginBottom: 12,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  closeButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  clientsList: {
+    maxHeight: 400,
+  },
+  clientCard: {
+    borderWidth: 1,
+    borderRadius: 8,
+    padding: 16,
+    marginBottom: 12,
+  },
+  clientName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 8,
+  },
+  clientPhone: {
+    fontSize: 16,
+    marginBottom: 4,
+  },
+  clientEmail: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
+  clientsButton: {
+    padding: 10,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 16,
   },
 });

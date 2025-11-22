@@ -200,7 +200,7 @@ export const getAvailableRoutes = async (req: Request, res: Response) => {
             });
 
             await route.save();
-            await route.populate("van", "plateNumber vanModel capacity");
+            await route.populate("van", "plateNumber vanModel capacity photo");
             await route.populate("manager", "firstName lastName phone");
             
             // Check if it matches the query filters and has available seats

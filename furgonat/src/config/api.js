@@ -2,7 +2,7 @@ import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const STORAGE_KEY = "@api_base_url";
-const PORT = 5000;
+const PORT = 5001;
 
 const testUrl = async (url, timeout = 2000) => {
   try {
@@ -114,7 +114,7 @@ export const detectServerIP = async () => {
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 2000);
-        const response = await fetch(`http://192.168.1.216:${PORT}/api/config/ip`, {
+        const response = await fetch(`http://192.168.1.98:${PORT}/api/config/ip`, {
           method: "GET",
           signal: controller.signal,
         });

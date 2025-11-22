@@ -9,6 +9,7 @@ export interface IRoute extends Document {
   manager: mongoose.Types.ObjectId;
   availableSeats: number;
   totalSeats: number;
+  price: number; // Çmimi për vend
   date: Date;
   status: "scheduled" | "completed" | "cancelled";
   created_at: Date;
@@ -24,6 +25,7 @@ const RouteSchema = new Schema<IRoute>(
     manager: { type: Schema.Types.ObjectId, ref: "User", required: true },
     availableSeats: { type: Number, required: true, default: 0 },
     totalSeats: { type: Number, required: true, default: 0 },
+    price: { type: Number, required: true, default: 0 },
     date: { type: Date, required: true },
     status: { 
       type: String, 

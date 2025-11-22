@@ -85,14 +85,18 @@ export function SettingsProvider({ children }) {
           android: "Roboto",
           default: "System",
         });
-      case "sans-serif":
-        return "sans-serif";
-      case "serif":
-        return "serif";
-      case "monospace":
-        return "monospace";
+      case "roboto":
+        return "Roboto";
+      case "arial":
+        return "Arial";
+      case "times":
+        return "Times New Roman";
       default:
-        return "System";
+        return Platform.select({
+          ios: "System",
+          android: "Roboto",
+          default: "System",
+        });
     }
   };
 
