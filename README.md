@@ -23,7 +23,7 @@ npm run dev
 ```bash
 cd furgonat
 npm install
-npm start
+npx expo start
 ```
 
 Pastaj hap me Expo Go në telefon ose simulator.
@@ -64,4 +64,5 @@ Pastaj hap me Expo Go në telefon ose simulator.
 
 
 ##
-Projekt i krijuar per te treguar dhe testuar aftesite e mia ne programim.
+Projekt i krijuar per te treguar dhe testuar aftesite e mia ne programim. Mund te kete momente qe kodi kerkon perditesim te librarive dhe versioneve te tyre, gje qe une i perditesoj here pas here. Faleminderit!
+
