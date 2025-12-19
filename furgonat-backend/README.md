@@ -14,7 +14,7 @@ npm install
 3. Konfiguro `.env`:
 ```env
 MONGODB_URI=mongodb://localhost:27017/furgonat
-PORT=5000
+PORT=3001
 JWT_SECRET=your_secret_key_here
 NODE_ENV=development
 ```
@@ -29,12 +29,12 @@ mongod
 npm run dev
 ```
 
-Serveri niset në `http://localhost:5000`
+Serveri niset në `http://localhost:3001`
 
 ## API Documentation
 
 Pas nisjes së serverit, dokumentacioni Swagger është i disponueshëm në:
-`http://localhost:5000/docs`
+`http://localhost:3001/docs`
 
 ## Database
 
@@ -72,6 +72,6 @@ src/
 | Variable | Description | Required |
 |----------|-------------|----------|
 | `MONGODB_URI` | MongoDB connection string | Yes |
-| `PORT` | Server port | No (default: 5000) |
+| `PORT` | Server port | No (default: 3001) |
 | `JWT_SECRET` | Secret për JWT tokens | Yes |
 | `NODE_ENV` | Environment (development/production) | No |

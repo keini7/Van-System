@@ -7,7 +7,7 @@ import managerRoutes from "./routes/manager.routes";
 import { errorHandler } from "./middleware/errorHandler";
 import os from "os";
 import { setupSwagger } from "./config/swagger";
-import { getNetworkIP } from "./utils/getNetworkIP";
+import { getNetworkIP, getAllNetworkIPs } from "./utils/getNetworkIP";
 import { initializeDatabase } from "./config/db";
 import { setupDatabase } from "./config/setupDatabase";
 import { setDbConnected, getDbStatus } from "./middleware/dbCheck.middleware";
@@ -66,7 +66,12 @@ app.get("/health", (req, res) => {
 // Endpoint për të marrë IP-në e kompjuterit (për frontend)
 app.get("/api/config/ip", (req, res) => {
   const ip = getNetworkIP();
-  res.json({ ip, port: Number(process.env.PORT) || 5001 });
+  const allIPs = getAllNetworkIPs();
+  res.json({ 
+    ip, 
+    port: Number(process.env.PORT) || 3001,
+    allIPs // Kthejmë të gjitha IP-të për frontend
+  });
 });
 
 // API Routes
@@ -100,7 +105,7 @@ app.use((req, res) => {
 // Error handler (must be last)
 app.use(errorHandler);
 
-const PORT = Number(process.env.PORT) || 5001;
+const PORT = Number(process.env.PORT) || 3001;
 const HOST = "0.0.0.0";
 
 /**
